@@ -37,6 +37,12 @@ Chick = 5
 Fredbear = 4
 Vixen = 3
 
+# DIFFICULTY OF THE ENEMY
+Bunnie_diff = 1
+Chick_diff = 1
+Fredbear_diff = 1
+Vixen_diff = 1
+
 # ODDS OF MOVING OUT OF (DIFFICULTY/ THIS NUMBER)
 # higher number = less chance of moving
 Bunnie_odds = 20
@@ -51,7 +57,7 @@ Vixen_odds = 50
 # | 8 | | 9 | |10 |
 
 # movement table
-table = np.zeros((4, 10))
+table = np.zeros((4, 11))
 
 
 def insert_direction(current_cell, next_cell, direction):
@@ -60,26 +66,26 @@ def insert_direction(current_cell, next_cell, direction):
 
 def populate_movement_table():
     # col 1
-    insert_direction(1, 3, Directions.SOUTH)
-    insert_direction(3, 1, Directions.NORTH)
-    insert_direction(3, 4, Directions.WEST)
-    insert_direction(3, 6, Directions.SOUTH)
-    insert_direction(6, 3, Directions.NORTH)
-    insert_direction(6, 8, Directions.EAST)
-    insert_direction(8, 9, Directions.WEST)
+    insert_direction(1, 3, Directions.SOUTH.value)
+    insert_direction(3, 1, Directions.NORTH.value)
+    insert_direction(3, 4, Directions.WEST.value)
+    insert_direction(3, 6, Directions.SOUTH.value)
+    insert_direction(6, 3, Directions.NORTH.value)
+    insert_direction(6, 8, Directions.EAST.value)
+    insert_direction(8, 9, Directions.WEST.value)
     # col 2
-    insert_direction(4, 3, Directions.EAST)
-    insert_direction(4, 5, Directions.WEST)
-    insert_direction(9, 8, Directions.EAST)
-    insert_direction(9, 10, Directions.WEST)
+    insert_direction(4, 3, Directions.EAST.value)
+    insert_direction(4, 5, Directions.WEST.value)
+    insert_direction(9, 8, Directions.EAST.value)
+    insert_direction(9, 10, Directions.WEST.value)
     # col 3
-    insert_direction(2, 5, Directions.SOUTH)
-    insert_direction(5, 2, Directions.NORTH)
-    insert_direction(5, 4, Directions.EAST)
-    insert_direction(5, 7, Directions.SOUTH)
-    insert_direction(7, 5, Directions.NORTH)
-    insert_direction(7, 10, Directions.SOUTH)
-    insert_direction(10, 9, Directions.EAST)
+    insert_direction(2, 5, Directions.SOUTH.value)
+    insert_direction(5, 2, Directions.NORTH.value)
+    insert_direction(5, 4, Directions.EAST.value)
+    insert_direction(5, 7, Directions.SOUTH.value)
+    insert_direction(7, 5, Directions.NORTH.value)
+    insert_direction(7, 10, Directions.SOUTH.value)
+    insert_direction(10, 9, Directions.EAST.value)
 
 
 def is_valid_move(current_cell, direction):
@@ -89,9 +95,16 @@ def is_valid_move(current_cell, direction):
 
 
 # TO DO - add later to specify entity
-def move(current_cell, direction):
-    return table[direction][current_cell]
+def move(enemy_location):
+    valid = False
+    while not valid:
+        movement = random.randint(0, 3)
+        if is_valid_move(enemy_location, movement):
+            return table[movement][enemy_location]
+    return enemy_location
 
+
+populate_movement_table()
 
 while running:
     # poll for events
@@ -118,12 +131,47 @@ while running:
     # if a second passed then check for movement opportunity
 
     # every second do a movement check
-    if seconds >= 0:
-        # 0 -> North
-        # 1 -> West
-        # 2 -> South
-        # 3 -> East
-        movement = random.randint(0, 3)
+    if seconds > 0:
+        seconds = 0
+        # check movement opportunity
+        rand_num = random.randint(1, Bunnie_odds)
+        # begin movement if movement opportunity lands below
+        if rand_num <= Bunnie_diff:
+            Bunnie = move(Bunnie)
+
+    # DRAWING THE FRAME
+    # MAP LAYOUT - simplified map
+    # | 1 |       | 2 |
+    # | 3 | | 4 | | 5 |
+    # | 6 |       | 7 |
+    # | 8 | | 9 | |10 |
+    # Make map
+    map_x = 30
+    map_y = 30
+    w = 75
+    h = 75
+    map_buff = 50
+    outline = 5
+    arr_x = [map_x, map_x + (map_buff * 4),
+             map_x, map_x + (map_buff * 2), map_x + (map_buff * 4),
+             map_x, map_x + (map_buff * 4),
+             map_x, map_x + (map_buff * 2), map_x + (map_buff * 4), ]
+    arr_y = [map_y, map_y,
+             map_y + (map_buff * 2), map_y + (map_buff * 2), map_y + (map_buff * 2),
+             map_y + (map_buff * 4), map_y + (map_buff * 4),
+             map_y + (map_buff * 6), map_y + (map_buff * 6), map_y + (map_buff * 6)]
+    i = 0
+    for x in arr_x:
+        pygame.draw.rect(screen, (0, 220, 0), (x, arr_y[i], w, h), outline)
+        i += 1
+
+    radius = 10
+    thickness = 0
+    match Bunnie:
+        case 1:
+            pygame.draw.circle(screen, (0, 50, 200), (x + (w / 2), y + (h / 2)), radius, thickness)
+        case 2:
+            pygame.draw.circle(screen, (0, 50, 200), (x + (w / 2), y + (h / 2)), radius, thickness)
 
     # Render new frame
     pygame.display.flip()
