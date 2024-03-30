@@ -171,11 +171,39 @@ while running:
             print("Bunnie moved")
             Bunnie = int(move(Bunnie))
             print(Bunnie)
+        # check movement opportunity
+        rand_num = random.randint(1, Chick_odds)
+        # begin movement if movement opportunity lands below
+        if rand_num <= Chick_diff:
+            print("Chick moved")
+            Chick = int(move(Chick))
+            print(Chick)
+        if rand_num <= Fredbear_diff:
+            print("Chick moved")
+            Chick = int(move(Chick))
+            print(Chick)
+        if rand_num <= Chick_diff:
+            print("Chick moved")
+            Chick = int(move(Chick))
+            print(Chick)
 
     # DRAWING THE FRAME
     draw_map(arr_x, arr_y)
-    pygame.draw.circle(screen, (0, 50, 200), (arr_x[(Bunnie - 1)] + (w / 2), arr_y[(Bunnie - 1)] + (h / 2)), radius,
-                       thickness)
+    Bunnie_x = arr_x[(Bunnie - 1)] + (w / 2)
+    Bunnie_y = arr_y[(Bunnie - 1)] + (h / 2)
+
+    Chick_x = arr_x[(Chick - 1)] + (w / 2)
+    Chick_y = arr_y[(Chick - 1)] + (h / 2)
+
+    Fredbear_x = arr_x[(Fredbear - 1)] + (w / 2)
+    Fredbear_y = arr_y[(Fredbear - 1)] + (h / 2)
+
+    Vixen_x = arr_x[(Vixen - 1)] + (w / 2)
+    Vixen_y = arr_y[(Vixen - 1)] + (h / 2)
+
+    pygame.draw.circle(screen, (0, 50, 200), (Bunnie_x, Bunnie_y), radius, thickness)
+    pygame.draw.circle(screen, (225, 225, 0), (Chick_x, Chick_y), radius, thickness)
+    pygame.draw.circle(screen, (150, 75, 0), (Fredbear_x, Fredbear_y), radius, thickness)
 
     # Render new frame
     pygame.display.flip()
