@@ -29,6 +29,7 @@ running = True
 
 milliseconds = 0
 seconds = 0
+prev_second = 0
 first_tick = pygame.time.get_ticks()
 
 # ENEMIES
@@ -104,7 +105,36 @@ def move(enemy_location):
     return enemy_location
 
 
+def draw_map(array_x, array_y):
+    i = 0
+    for x in array_x:
+        pygame.draw.rect(screen, (0, 220, 0), (x, array_y[i], w, h), outline)
+        i += 1
+
+
+# MAP LAYOUT - simplified map
+# | 1 |       | 2 |
+# | 3 | | 4 | | 5 |
+# | 6 |       | 7 |
+# | 8 | | 9 | |10 |
+# Make map
 populate_movement_table()
+map_x = 30
+map_y = 30
+w = 75
+h = 75
+map_buff = 50
+outline = 5
+arr_x = [map_x, map_x + (map_buff * 4),
+         map_x, map_x + (map_buff * 2), map_x + (map_buff * 4),
+         map_x, map_x + (map_buff * 4),
+         map_x, map_x + (map_buff * 2), map_x + (map_buff * 4), ]
+arr_y = [map_y, map_y,
+         map_y + (map_buff * 2), map_y + (map_buff * 2), map_y + (map_buff * 2),
+         map_y + (map_buff * 4), map_y + (map_buff * 4),
+         map_y + (map_buff * 6), map_y + (map_buff * 6), map_y + (map_buff * 6)]
+radius = 10
+thickness = 0
 
 while running:
     # poll for events
@@ -124,54 +154,28 @@ while running:
 
     # converts to seconds so timings make sense to players
     if milliseconds > 1000:
-        seconds = milliseconds / 1000
+        seconds += milliseconds / 1000
         milliseconds = milliseconds % 1000
 
     # BONNIE AI - PORT THIS TO ENEMY CLASS
     # if a second passed then check for movement opportunity
 
     # every second do a movement check
-    if seconds > 0:
-        seconds = 0
+    if seconds > prev_second:
+        prev_second = seconds
+        print(seconds)
         # check movement opportunity
         rand_num = random.randint(1, Bunnie_odds)
         # begin movement if movement opportunity lands below
         if rand_num <= Bunnie_diff:
-            Bunnie = move(Bunnie)
+            print("Bunnie moved")
+            Bunnie = int(move(Bunnie))
+            print(Bunnie)
 
     # DRAWING THE FRAME
-    # MAP LAYOUT - simplified map
-    # | 1 |       | 2 |
-    # | 3 | | 4 | | 5 |
-    # | 6 |       | 7 |
-    # | 8 | | 9 | |10 |
-    # Make map
-    map_x = 30
-    map_y = 30
-    w = 75
-    h = 75
-    map_buff = 50
-    outline = 5
-    arr_x = [map_x, map_x + (map_buff * 4),
-             map_x, map_x + (map_buff * 2), map_x + (map_buff * 4),
-             map_x, map_x + (map_buff * 4),
-             map_x, map_x + (map_buff * 2), map_x + (map_buff * 4), ]
-    arr_y = [map_y, map_y,
-             map_y + (map_buff * 2), map_y + (map_buff * 2), map_y + (map_buff * 2),
-             map_y + (map_buff * 4), map_y + (map_buff * 4),
-             map_y + (map_buff * 6), map_y + (map_buff * 6), map_y + (map_buff * 6)]
-    i = 0
-    for x in arr_x:
-        pygame.draw.rect(screen, (0, 220, 0), (x, arr_y[i], w, h), outline)
-        i += 1
-
-    radius = 10
-    thickness = 0
-    match Bunnie:
-        case 1:
-            pygame.draw.circle(screen, (0, 50, 200), (x + (w / 2), y + (h / 2)), radius, thickness)
-        case 2:
-            pygame.draw.circle(screen, (0, 50, 200), (x + (w / 2), y + (h / 2)), radius, thickness)
+    draw_map(arr_x, arr_y)
+    pygame.draw.circle(screen, (0, 50, 200), (arr_x[(Bunnie - 1)] + (w / 2), arr_y[(Bunnie - 1)] + (h / 2)), radius,
+                       thickness)
 
     # Render new frame
     pygame.display.flip()
