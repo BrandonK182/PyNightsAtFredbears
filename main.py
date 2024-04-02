@@ -1,6 +1,7 @@
 import pygame
 import random
 import numpy as np
+from Bunnie import Bunnie_Class
 
 from enum import Enum
 
@@ -10,13 +11,6 @@ class GAME_STATE(Enum):
     GAME = 1
     GAME_OVER = 2
     WIN = 3
-
-
-class Directions(Enum):
-    NORTH = 0
-    WEST = 1
-    SOUTH = 2
-    EAST = 3
 
 
 # Press Shift+F10 to execute it or replace it with your code.
@@ -34,77 +28,10 @@ prev_second = 0
 first_tick = pygame.time.get_ticks()
 
 # ENEMIES
-Bunnie = 3
+Bunnie = Bunnie_Class
 Chick = 5
 Fredbear = 4
 Vixen = 3
-
-# DIFFICULTY OF THE ENEMY
-Bunnie_diff = 5
-Chick_diff = 5
-Fredbear_diff = 3
-Vixen_diff = 1
-
-# ODDS OF MOVING OUT OF (DIFFICULTY/ THIS NUMBER)
-# higher number = less chance of moving
-Bunnie_odds = 20
-Chick_odds = 20
-Fredbear_odds = 30
-Vixen_odds = 50
-
-# MAP LAYOUT - simplified map
-# | 1 |       | 2 |
-# | 3 | | 4 | | 5 |
-# | 6 |       | 7 |
-# | 8 | | 9 | |10 |
-
-# movement table
-table = np.zeros((4, 11))
-
-
-def insert_direction(current_cell, next_cell, direction):
-    table[direction][current_cell] = next_cell
-
-
-def populate_movement_table():
-    # col 1
-    insert_direction(1, 3, Directions.SOUTH.value)
-    insert_direction(3, 1, Directions.NORTH.value)
-    insert_direction(3, 4, Directions.WEST.value)
-    insert_direction(3, 6, Directions.SOUTH.value)
-    insert_direction(6, 3, Directions.NORTH.value)
-    insert_direction(6, 8, Directions.EAST.value)
-    insert_direction(8, 9, Directions.WEST.value)
-    # col 2
-    insert_direction(4, 3, Directions.EAST.value)
-    insert_direction(4, 5, Directions.WEST.value)
-    insert_direction(9, 8, Directions.EAST.value)
-    insert_direction(9, 10, Directions.WEST.value)
-    # col 3
-    insert_direction(2, 5, Directions.SOUTH.value)
-    insert_direction(5, 2, Directions.NORTH.value)
-    insert_direction(5, 4, Directions.EAST.value)
-    insert_direction(5, 7, Directions.SOUTH.value)
-    insert_direction(7, 5, Directions.NORTH.value)
-    insert_direction(7, 10, Directions.SOUTH.value)
-    insert_direction(10, 9, Directions.EAST.value)
-
-
-def is_valid_move(current_cell, direction):
-    if table[direction][current_cell] == 0:
-        return False
-    return True
-
-
-# TO DO - add later to specify entity
-def move(enemy_location):
-    valid = False
-    while not valid:
-        movement = random.randint(0, 3)
-        if is_valid_move(enemy_location, movement):
-            return table[movement][enemy_location]
-    return enemy_location
-
 
 def draw_map(array_x, array_y):
     i = 0
@@ -113,13 +40,6 @@ def draw_map(array_x, array_y):
         i += 1
 
 
-# MAP LAYOUT - simplified map
-# | 1 |       | 2 |
-# | 3 | | 4 | | 5 |
-# | 6 |       | 7 |
-# | 8 | | 9 | |10 |
-# Make map
-populate_movement_table()
 map_x = 30
 map_y = 30
 w = 50
@@ -170,7 +90,7 @@ while running:
         prev_second = seconds
         print(seconds)
         # check movement opportunity
-        rand_num = random.randint(1, Bunnie_odds)
+        rand_num = random.randint(1, Bunnie)
         # begin movement if movement opportunity lands below
         if rand_num <= Bunnie_diff:
             print("Bunnie moved")
