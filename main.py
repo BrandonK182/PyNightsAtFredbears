@@ -9,6 +9,7 @@ class GAME_STATE(Enum):
     MENU = 0
     GAME = 1
     GAME_OVER = 2
+    WIN = 3
 
 
 class Directions(Enum):
@@ -59,6 +60,7 @@ Vixen_odds = 50
 
 # movement table
 table = np.zeros((4, 11))
+
 
 def insert_direction(current_cell, next_cell, direction):
     table[direction][current_cell] = next_cell
@@ -120,9 +122,9 @@ def draw_map(array_x, array_y):
 populate_movement_table()
 map_x = 30
 map_y = 30
-w = 75
-h = 75
-map_buff = 50
+w = 50
+h = 50
+map_buff = 30
 outline = 5
 arr_x = [map_x, map_x + (map_buff * 4),
          map_x, map_x + (map_buff * 2), map_x + (map_buff * 4),
@@ -135,12 +137,16 @@ arr_y = [map_y, map_y,
 radius = 10
 thickness = 0
 
+mouse_held = False
+
 while running:
     # poll for events
     # pygame.QUIT event means the user clicked X to close your window
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             running = False
+        if event.type == pygame.MOUSEBUTTONUP:
+            mouse_held = False
 
     # fill the screen with a color to wipe away anything from last frame
     screen.fill("black")
@@ -200,11 +206,33 @@ while running:
     Vixen_x = arr_x[(Vixen - 1)] + (w / 2)
     Vixen_y = arr_y[(Vixen - 1)] + (h / 2)
 
+    # drawing enemy units
     pygame.draw.circle(screen, (0, 50, 200), (Bunnie_x, Bunnie_y), radius, thickness)
     pygame.draw.circle(screen, (225, 225, 0), (Chick_x, Chick_y), radius, thickness)
     pygame.draw.circle(screen, (150, 75, 0), (Fredbear_x, Fredbear_y), radius, thickness)
 
-    pygame.draw.rect(screen, )
+    btn_x = 200
+    btn_y = 400
+    btn2_x = 1000
+    btn_size = 50
+    # drawing the buttons used in game
+    pygame.draw.rect(screen, (225, 0, 0), pygame.Rect(btn_x, btn_y, btn_size, btn_size))
+    pygame.draw.rect(screen, (225, 0, 0), pygame.Rect(1000, 400, 50, 50))
+
+    # if button is clicked
+    mouse_presses = pygame.mouse.get_pressed()
+
+    if mouse_presses[0] and not mouse_held:
+        print("Left Mouse was pressed")
+        mouse_held = True
+        mousex, mousey = pygame.mouse.get_pos()
+        # TO DO - FIX BUTTON PRESS TO BE MORE STREAMLINED
+        if btn_y < mousey < btn_y + btn_size:
+            if btn_x < mousex < btn_x + btn_size:
+                print("press button 1")
+            elif btn2_x < mousex < btn2_x + btn_size:
+                print("press button 2")
+
     # Render new frame
     pygame.display.flip()
 
