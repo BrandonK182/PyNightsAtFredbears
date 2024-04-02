@@ -39,9 +39,9 @@ Fredbear = 4
 Vixen = 3
 
 # DIFFICULTY OF THE ENEMY
-Bunnie_diff = 1
-Chick_diff = 1
-Fredbear_diff = 1
+Bunnie_diff = 5
+Chick_diff = 5
+Fredbear_diff = 3
 Vixen_diff = 1
 
 # ODDS OF MOVING OUT OF (DIFFICULTY/ THIS NUMBER)
@@ -59,7 +59,6 @@ Vixen_odds = 50
 
 # movement table
 table = np.zeros((4, 11))
-
 
 def insert_direction(current_cell, next_cell, direction):
     table[direction][current_cell] = next_cell
@@ -179,13 +178,13 @@ while running:
             Chick = int(move(Chick))
             print(Chick)
         if rand_num <= Fredbear_diff:
-            print("Chick moved")
-            Chick = int(move(Chick))
-            print(Chick)
-        if rand_num <= Chick_diff:
-            print("Chick moved")
-            Chick = int(move(Chick))
-            print(Chick)
+            print("Fredbear moved")
+            Fredbear = int(move(Fredbear))
+            print(Fredbear)
+        if rand_num <= Vixen_diff:
+            print("Vixen moved")
+            Vixen = int(move(Vixen))
+            print(Vixen)
 
     # DRAWING THE FRAME
     draw_map(arr_x, arr_y)
@@ -205,6 +204,7 @@ while running:
     pygame.draw.circle(screen, (225, 225, 0), (Chick_x, Chick_y), radius, thickness)
     pygame.draw.circle(screen, (150, 75, 0), (Fredbear_x, Fredbear_y), radius, thickness)
 
+    pygame.draw.rect(screen, )
     # Render new frame
     pygame.display.flip()
 
