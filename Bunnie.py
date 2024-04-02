@@ -16,10 +16,11 @@ class Bunnie_Class(Enemy):
                         | 1 |
     Maintenance  <-->   Main Room    <-->  Restrooms
     | 2 |------------| 3 |------------------| 5 |
-                  |  | 4 |            |
-    Closet      <-->  Left   |  Right  <-->    Kitchen     
-    | 6 |-------| 7 |               | 8 |----| 9 |
-                  |                   |
+                    VIXEN CAM
+                  |  | 4 |            |         
+    Closet      <-->  Left   |  Right          Kitchen     
+    | 6 |-------| 7 |               | 8 |       | 9 |
+                  |         YOU       |
                 |10 |------|11|-----|12 |
     '''
 
@@ -30,9 +31,7 @@ class Bunnie_Class(Enemy):
         self.insert_direction(2, 3, self.Directions.RIGHT.value)
         self.insert_direction(3, 5, self.Directions.RIGHT.value)
         self.insert_direction(3, 2, self.Directions.LEFT.value)
-        self.insert_direction(3, 4, self.Directions.DOWN.value)
-        self.insert_direction(4, 3, self.Directions.UP.value)
-        self.insert_direction(4, 7, self.Directions.DOWN.value)
+        self.insert_direction(3, 7, self.Directions.DOWN.value)
         # row 3
         self.insert_direction(6, 7, self.Directions.RIGHT.value)
         self.insert_direction(7, 6, self.Directions.LEFT.value)

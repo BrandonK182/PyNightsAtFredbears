@@ -14,7 +14,6 @@ class Enemy:
         self.movement_table = np.zeros((4, 13))
         self.position = 1
         self.difficulty = difficulty
-        self.odds = 20
 
     class Directions(Enum):
         UP = 0
