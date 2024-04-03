@@ -48,5 +48,16 @@ class Enemy:
             self.position = int(self.move(self.position))
             print("Bunnie moved to " + str(self.position))
 
+    def kill_opportunity(self):
+        rand_num = random.randint(1, 20)
+        if rand_num <= self.difficulty:
+            return True
+        return False
+
     def raise_difficulty(self):
         self.difficulty += 1
+
+    def can_attack(self):
+        if self.position == 11:
+            return True
+        return False

@@ -44,7 +44,4 @@ class Bunnie_Class(Enemy):
         self.insert_direction(10, 7, self.Directions.UP.value)
         self.insert_direction(10, 11, self.Directions.RIGHT.value)
 
-    def can_attack(self):
-        if self.position == 11:
-            return True
-        return False
+

@@ -11,6 +11,7 @@ class GAME_STATE(Enum):
     GAME = 1
     GAME_OVER = 2
     WIN = 3
+    GAME_OVER_BUNNIE = 4
 
 
 # Press Shift+F10 to execute it or replace it with your code.
@@ -21,6 +22,7 @@ pygame.init()
 screen = pygame.display.set_mode((1280, 720))
 clock = pygame.time.Clock()
 running = True
+state = GAME_STATE.GAME
 
 milliseconds = 0
 seconds = 0
@@ -36,6 +38,8 @@ Vixen = 3
 grey = (100, 100, 100)
 white = (200, 200, 200)
 off_white = (175, 175, 175)
+red = (200, 0, 0)
+green = (0, 200, 0)
 thick = 2
 scale = 2
 map_x = 225
@@ -47,8 +51,10 @@ cam_x = np.zeros(11)
 cam_y = np.zeros(11)
 cam_w = 40 * scale
 cam_h = 25 * scale
-left_door = False
-right_door = False
+left_door_closed = False
+right_door_closed = False
+left_color = red
+right_color = green
 
 game_map = Map(map_x, map_y, scale, thick)
 current_cam = game_map.cameras[0]
@@ -109,11 +115,21 @@ while running:
     # if a second passed then check for movement opportunity
 
     # every second do a movement check
-    if seconds > prev_second:
+    if seconds - prev_second > 5:
         prev_second = seconds
         print(seconds)
         # check movement opportunity
-        Bunnie.movement_opportunity()
+        if Bunnie.can_attack():
+            if Bunnie.kill_opportunity():
+                if left_door_closed:
+                    # resets position if the player stopped Bunnie
+                    Bunnie.reset()
+                else:
+                    # kill player
+                    state = GAME_STATE.GAME_OVER_BUNNIE
+        else:
+            Bunnie.movement_opportunity()
+
 
     # DRAWING THE FRAME
     bunnie_cam = match_camera(Bunnie.position)
@@ -131,8 +147,16 @@ while running:
     btn2_x = 1000
     btn_size = 50
     # drawing the buttons used in game
-    pygame.draw.rect(screen, (225, 0, 0), pygame.Rect(btn_x, btn_y, btn_size, btn_size))
-    pygame.draw.rect(screen, (225, 0, 0), pygame.Rect(btn2_x, btn_y, btn_size, btn_size))
+    if left_door_closed:
+        left_color = green
+    else:
+        left_color = red
+    if right_door_closed:
+        right_color = green
+    else:
+        right_color = red
+    pygame.draw.rect(screen, left_color, pygame.Rect(btn_x, btn_y, btn_size, btn_size))
+    pygame.draw.rect(screen, right_color, pygame.Rect(btn2_x, btn_y, btn_size, btn_size))
 
     # if button is clicked
     mouse_presses = pygame.mouse.get_pressed()
@@ -145,12 +169,17 @@ while running:
         if btn_y < mousey < btn_y + btn_size:
             if btn_x < mousex < btn_x + btn_size:
                 print("press button 1")
+                left_door_closed = not left_door_closed
             elif btn2_x < mousex < btn2_x + btn_size:
                 print("press button 2")
+                right_door_closed = not right_door_closed
         # check if camera is clicked
         current_cam = get_camera_clicked(mousex, mousey, current_cam)
 
     pygame.draw.rect(screen, off_white, pygame.Rect(current_cam.x, current_cam.y, current_cam.w, current_cam.h))
+
+    if state == GAME_STATE.GAME_OVER_BUNNIE:
+        screen.fill("purple")
 
     # Render new frame
     pygame.display.flip()
