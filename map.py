@@ -14,6 +14,8 @@ class Map():
         self.height_arr = list()
         self.scale = scale
         self.thick = thickness
+        self.populate_map()
+        self.populate_cameras()
 
     def insert_rect(self, x, y, w, h):
         self.array_x.append(x)
@@ -65,15 +67,15 @@ class Map():
         self.cameras.append(camera)
 
     def populate_cameras(self):
-        self.insert_camera(Camera("1A", self.map_x + 112.5*self.scale, self.map_y + 12.5*self.scale, self.scale))
-        self.insert_camera(Camera("1B", self.map_x + 100*self.scale, self.map_y + 50*self.scale, self.scale))
-        self.insert_camera(Camera("1C", self.map_x + 70*self.scale, self.map_y + 130*self.scale, self.scale))
-        self.insert_camera(Camera("2A", self.map_x + 115*self.scale, self.map_y + 235*self.scale, self.scale))
-        self.insert_camera(Camera("2B", self.map_x + 115*self.scale,  self.map_y + 265*self.scale, self.scale))
-        self.insert_camera(Camera("C", self.map_x + 55*self.scale, self.map_y + 235*self.scale, self.scale))
+        self.insert_camera(Camera("1A", self.map_x + 112.5*self.scale, self.map_y + 12.5*self.scale, self.scale, 1))
+        self.insert_camera(Camera("1B", self.map_x + 100*self.scale, self.map_y + 50*self.scale, self.scale, 3))
+        self.insert_camera(Camera("1C", self.map_x + 70*self.scale, self.map_y + 130*self.scale, self.scale, 4))
+        self.insert_camera(Camera("2A", self.map_x + 115*self.scale, self.map_y + 235*self.scale, self.scale, 7))
+        self.insert_camera(Camera("2B", self.map_x + 115*self.scale,  self.map_y + 265*self.scale, self.scale, 10))
+        self.insert_camera(Camera("3", self.map_x + 55*self.scale, self.map_y + 235*self.scale, self.scale, 6))
 
-        self.insert_camera(Camera("4A", self.map_x + 205*self.scale, self.map_y + 235*self.scale, self.scale))
-        self.insert_camera(Camera("4B", self.map_x + 205*self.scale, self.map_y + 265*self.scale, self.scale))
-        self.insert_camera(Camera("5", self.map_x + 5*self.scale, self.map_y + 75*self.scale, self.scale))
-        self.insert_camera(Camera("6", self.map_x + 295*self.scale, self.map_y + 225*self.scale, self.scale))
-        self.insert_camera(Camera("7", self.map_x + 295*self.scale, self.map_y + 80*self.scale, self.scale))
+        self.insert_camera(Camera("4A", self.map_x + 205*self.scale, self.map_y + 235*self.scale, self.scale, 8))
+        self.insert_camera(Camera("4B", self.map_x + 205*self.scale, self.map_y + 265*self.scale, self.scale, 12))
+        self.insert_camera(Camera("5", self.map_x + 5*self.scale, self.map_y + 75*self.scale, self.scale, 2))
+        self.insert_camera(Camera("6", self.map_x + 295*self.scale, self.map_y + 225*self.scale, self.scale, 9))
+        self.insert_camera(Camera("7", self.map_x + 295*self.scale, self.map_y + 80*self.scale, self.scale, 5))

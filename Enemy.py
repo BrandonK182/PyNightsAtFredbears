@@ -32,10 +32,21 @@ class Enemy:
     def move(self, enemy_location):
         valid = False
         while not valid:
+            print("TEST")
             movement = random.randint(0, 3)
             if self.is_valid_move(enemy_location, movement):
+                print("VALID")
                 return self.movement_table[movement][enemy_location]
         return enemy_location
 
     def reset(self):
         self.position = 3
+
+    def movement_opportunity(self):
+        rand_num = random.randint(1, 20)
+        if rand_num <= self.difficulty:
+            self.position = int(self.move(self.position))
+            print("Bunnie moved to " + str(self.position))
+
+    def raise_difficulty(self):
+        self.difficulty += 1

@@ -28,13 +28,14 @@ prev_second = 0
 first_tick = pygame.time.get_ticks()
 
 # ENEMIES
-Bunnie = Bunnie_Class()
+Bunnie = Bunnie_Class(15)
 Chick = 5
 Fredbear = 4
 Vixen = 3
 
 grey = (100, 100, 100)
 white = (200, 200, 200)
+off_white = (175, 175, 175)
 thick = 2
 scale = 2
 map_x = 225
@@ -46,10 +47,11 @@ cam_x = np.zeros(11)
 cam_y = np.zeros(11)
 cam_w = 40 * scale
 cam_h = 25 * scale
+left_door = False
+right_door = False
 
-game_map = Map(map_x, map_y, 2, 2)
-game_map.populate_map()
-game_map.populate_cameras()
+game_map = Map(map_x, map_y, scale, thick)
+current_cam = game_map.cameras[0]
 
 
 def draw_map():
@@ -61,7 +63,23 @@ def draw_map():
         i += 1
     # CAM SQUARES
     for cam in game_map.cameras:
-        pygame.draw.rect(screen, white, (cam.x, cam.y, cam.w, cam.h), cam.thick)  # Cam 6
+        pygame.draw.rect(screen, white, (cam.x, cam.y, cam.w, cam.h), cam.thick)
+
+
+def get_camera_clicked(x, y, current):
+    for cam in game_map.cameras:
+        if cam.y < y < cam.y + cam.h:
+            if cam.x < x < cam.x + cam.w:
+                print("pressed CAM " + cam.name)
+                return cam
+    return current
+
+
+def match_camera(position):
+    for cam in game_map.cameras:
+        if cam.position == position:
+            return cam
+    return game_map.cameras[0]
 
 
 while running:
@@ -95,48 +113,16 @@ while running:
         prev_second = seconds
         print(seconds)
         # check movement opportunity
-        rand_num = random.randint(1, 20)
-        # begin movement if movement opportunity lands below
-        '''
-        if rand_num <= Bunnie_diff:
-            print("Bunnie moved")
-            Bunnie = int(move(Bunnie))
-            print(Bunnie)
-        # check movement opportunity
-        rand_num = random.randint(1, Chick_odds)
-        # begin movement if movement opportunity lands below
-        if rand_num <= Chick_diff:
-            print("Chick moved")
-            Chick = int(move(Chick))
-            print(Chick)
-        if rand_num <= Fredbear_diff:
-            print("Fredbear moved")
-            Fredbear = int(move(Fredbear))
-            print(Fredbear)
-        if rand_num <= Vixen_diff:
-            print("Vixen moved")
-            Vixen = int(move(Vixen))
-            print(Vixen)
-                    
+        Bunnie.movement_opportunity()
 
     # DRAWING THE FRAME
-    Bunnie_x = arr_x[(Bunnie - 1)] + (w / 2)
-    Bunnie_y = arr_y[(Bunnie - 1)] + (h / 2)
-
-    Chick_x = arr_x[(Chick - 1)] + (w / 2)
-    Chick_y = arr_y[(Chick - 1)] + (h / 2)
-
-    Fredbear_x = arr_x[(Fredbear - 1)] + (w / 2)
-    Fredbear_y = arr_y[(Fredbear - 1)] + (h / 2)
-
-    Vixen_x = arr_x[(Vixen - 1)] + (w / 2)
-    Vixen_y = arr_y[(Vixen - 1)] + (h / 2)
+    bunnie_cam = match_camera(Bunnie.position)
+    Bunnie_x = bunnie_cam.x + 100
 
     # drawing enemy units
-    pygame.draw.circle(screen, (0, 50, 200), (Bunnie_x, Bunnie_y), radius, thickness)
-    pygame.draw.circle(screen, (225, 225, 0), (Chick_x, Chick_y), radius, thickness)
-    pygame.draw.circle(screen, (150, 75, 0), (Fredbear_x, Fredbear_y), radius, thickness)
-    '''
+    pygame.draw.circle(screen, (0, 50, 200), (Bunnie_x, bunnie_cam.y), radius, 0)
+    # pygame.draw.circle(screen, (225, 225, 0), (Chick_x, Chick_y), radius, 0)
+    # pygame.draw.circle(screen, (150, 75, 0), (Fredbear_x, Fredbear_y), radius, 0)
 
     draw_map()
 
@@ -146,7 +132,7 @@ while running:
     btn_size = 50
     # drawing the buttons used in game
     pygame.draw.rect(screen, (225, 0, 0), pygame.Rect(btn_x, btn_y, btn_size, btn_size))
-    pygame.draw.rect(screen, (225, 0, 0), pygame.Rect(1000, 400, 50, 50))
+    pygame.draw.rect(screen, (225, 0, 0), pygame.Rect(btn2_x, btn_y, btn_size, btn_size))
 
     # if button is clicked
     mouse_presses = pygame.mouse.get_pressed()
@@ -161,6 +147,10 @@ while running:
                 print("press button 1")
             elif btn2_x < mousex < btn2_x + btn_size:
                 print("press button 2")
+        # check if camera is clicked
+        current_cam = get_camera_clicked(mousex, mousey, current_cam)
+
+    pygame.draw.rect(screen, off_white, pygame.Rect(current_cam.x, current_cam.y, current_cam.w, current_cam.h))
 
     # Render new frame
     pygame.display.flip()
