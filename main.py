@@ -41,8 +41,8 @@ off_white = (175, 175, 175)
 red = (200, 0, 0)
 green = (0, 200, 0)
 thick = 2
-scale = 2
-map_x = 225
+scale = 1.5
+map_x = 250
 map_y = 30
 outline = 5
 radius = 10
@@ -55,6 +55,12 @@ left_door_closed = False
 right_door_closed = False
 left_color = red
 right_color = green
+cam_flip_x = 100
+cam_flip_y = 600
+cam_flip_w = 800
+cam_flip_h = 100
+cam_flipped_up = False
+cam_flip_hover = False
 
 game_map = Map(map_x, map_y, scale, thick)
 current_cam = game_map.cameras[0]
@@ -132,51 +138,79 @@ while running:
 
 
     # DRAWING THE FRAME
-    bunnie_cam = match_camera(Bunnie.position)
-    Bunnie_x = bunnie_cam.x + 100
-
-    # drawing enemy units
-    pygame.draw.circle(screen, (0, 50, 200), (Bunnie_x, bunnie_cam.y), radius, 0)
-    # pygame.draw.circle(screen, (225, 225, 0), (Chick_x, Chick_y), radius, 0)
-    # pygame.draw.circle(screen, (150, 75, 0), (Fredbear_x, Fredbear_y), radius, 0)
-
-    draw_map()
-
-    btn_x = 200
-    btn_y = 400
-    btn2_x = 1000
-    btn_size = 50
-    # drawing the buttons used in game
-    if left_door_closed:
-        left_color = green
+    if Bunnie.position == 11:
+        bunnie_cam = match_camera(10)
+        Bunnie_x = bunnie_cam.x + 100 * game_map.scale
+        Bunnie_y = bunnie_cam.y + 100 * game_map.scale
     else:
-        left_color = red
-    if right_door_closed:
-        right_color = green
-    else:
-        right_color = red
-    pygame.draw.rect(screen, left_color, pygame.Rect(btn_x, btn_y, btn_size, btn_size))
-    pygame.draw.rect(screen, right_color, pygame.Rect(btn2_x, btn_y, btn_size, btn_size))
+        bunnie_cam = match_camera(Bunnie.position)
+        Bunnie_x = bunnie_cam.x + (50 * game_map.scale)
+        Bunnie_y = bunnie_cam.y + (10 * game_map.scale)
+
+    # draw the boundaries for the camera flip marker
+    pygame.draw.rect(screen, off_white, (cam_flip_x, cam_flip_y, cam_flip_w, cam_flip_h), 1)
 
     # if button is clicked
     mouse_presses = pygame.mouse.get_pressed()
+    mousex, mousey = pygame.mouse.get_pos()
 
+    #check which door button or camera was clicked
     if mouse_presses[0] and not mouse_held:
         print("Left Mouse was pressed")
         mouse_held = True
-        mousex, mousey = pygame.mouse.get_pos()
-        # TO DO - FIX BUTTON PRESS TO BE MORE STREAMLINED
-        if btn_y < mousey < btn_y + btn_size:
-            if btn_x < mousex < btn_x + btn_size:
-                print("press button 1")
-                left_door_closed = not left_door_closed
-            elif btn2_x < mousex < btn2_x + btn_size:
-                print("press button 2")
-                right_door_closed = not right_door_closed
-        # check if camera is clicked
-        current_cam = get_camera_clicked(mousex, mousey, current_cam)
+        # let the user click cameras if cameras are up
+        if cam_flipped_up:
+            # check if camera is clicked
+            current_cam = get_camera_clicked(mousex, mousey, current_cam)
+        # if users are in the office, let them click the door buttons
+        else:
+            if btn_y < mousey < btn_y + btn_size:
+                if btn_x < mousex < btn_x + btn_size:
+                    print("press button 1")
+                    left_door_closed = not left_door_closed
+                elif btn2_x < mousex < btn2_x + btn_size:
+                    print("press button 2")
+                    right_door_closed = not right_door_closed
 
-    pygame.draw.rect(screen, off_white, pygame.Rect(current_cam.x, current_cam.y, current_cam.w, current_cam.h))
+
+    # flips the camera if the user flicks their mouse down to the box
+    if not cam_flip_hover:
+        if cam_flip_x < mousex < cam_flip_x + cam_flip_w:
+            if cam_flip_y < mousey < cam_flip_y + cam_flip_h:
+                # toggles cameras
+                cam_flip_hover = True
+                cam_flipped_up = not cam_flipped_up
+    # measure to prevent multiple toggles when user mouse hovers
+    else:
+        if cam_flip_y > mousey:
+            cam_flip_hover = False
+
+    #draw camera scene
+    if cam_flipped_up:
+        draw_map()
+        # highlight the camera selected
+        pygame.draw.rect(screen, off_white, pygame.Rect(current_cam.x, current_cam.y, current_cam.w, current_cam.h))
+        # drawing enemy units
+        pygame.draw.circle(screen, (0, 50, 200), (Bunnie_x, Bunnie_y), radius, 0)
+        # pygame.draw.circle(screen, (225, 225, 0), (Chick_x, Chick_y), radius, 0)
+        # pygame.draw.circle(screen, (150, 75, 0), (Fredbear_x, Fredbear_y), radius, 0)
+    # draw the office
+    else:
+        btn_x = 200
+        btn_y = 400
+        btn2_x = 1000
+        btn_size = 50
+        # drawing the buttons used in game
+        if left_door_closed:
+            left_color = green
+        else:
+            left_color = red
+        if right_door_closed:
+            right_color = green
+        else:
+            right_color = red
+        pygame.draw.rect(screen, left_color, pygame.Rect(btn_x, btn_y, btn_size, btn_size))
+        pygame.draw.rect(screen, right_color, pygame.Rect(btn2_x, btn_y, btn_size, btn_size))
 
     if state == GAME_STATE.GAME_OVER_BUNNIE:
         screen.fill("purple")
