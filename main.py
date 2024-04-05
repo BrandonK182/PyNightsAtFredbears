@@ -4,6 +4,7 @@ import numpy as np
 from Bunnie import Bunnie
 from Chick import Chick
 from Fred import Fred
+from Vixen import Vixen
 from map import Map
 from enum import Enum
 
@@ -40,17 +41,19 @@ chickDifficulty = 15
 fredDifficulty = 15
 vixenDifficulty = 15
 
+vixenEZ = False
+
 bunnie = Bunnie(bunnieDifficulty)
 chick = Chick(chickDifficulty)
 fred = Fred(fredDifficulty)
-vixen = 3
+vixen = Vixen(vixenDifficulty, vixenEZ)
 
 grey = (100, 100, 100)
 white = (200, 200, 200)
 off_white = (175, 175, 175)
 red = (200, 0, 0)
 green = (0, 200, 0)
-thick = 2
+thick = 3
 scale = 1.5
 map_x = 250
 map_y = 30
@@ -168,6 +171,14 @@ while running:
         else:
             fred.movement_opportunity()
 
+    # Vixen's timer
+    vixen.move(current_cam, cam_flipped_up, time_passed/1000)
+    if vixen.can_kill():
+        if left_door_closed:
+            vixen.reset()
+        else:
+            state = GAME_STATE.GAME_OVER_VIXEN
+
     # CAMERA LOGIC
     # if button is clicked
     mouse_presses = pygame.mouse.get_pressed()
@@ -233,9 +244,17 @@ while running:
             fred_cam = match_camera(fred.position)
             fred_x = fred_cam.x + (90 * game_map.scale)
             fred_y = fred_cam.y + (10 * game_map.scale)
+        if vixen.position == 7:
+            vixen_cam = match_camera(7)
+            vixen_x = vixen_cam.x + (70 * game_map.scale)
+            vixen_y = vixen_cam.y + (10 * game_map.scale)
+        else:
+            vixen_cam = match_camera(vixen.position)
+            vixen_x = vixen_cam.x + (50 * game_map.scale)
+            vixen_y = vixen_cam.y + (10 * game_map.scale)
 
     # draw the boundaries for the camera flip marker
-    pygame.draw.rect(screen, off_white, (cam_flip_x, cam_flip_y, cam_flip_w, cam_flip_h), 1)
+    pygame.draw.rect(screen, off_white, (cam_flip_x, cam_flip_y, cam_flip_w, cam_flip_h), thick)
 
     # draw camera scene
     if cam_flipped_up:
@@ -247,6 +266,7 @@ while running:
             pygame.draw.circle(screen, (0, 50, 200), (bunnie_x, bunnie_y), radius, 0)
             pygame.draw.circle(screen, (225, 225, 0), (chick_x, chick_y), radius, 0)
             pygame.draw.circle(screen, (150, 75, 0), (fred_x, fred_y), radius, 0)
+            pygame.draw.circle(screen, (225, 25, 25), (vixen_x, vixen_y), vixen.stage*scale, 0)
     # draw the office
     else:
         btn_x = 200
