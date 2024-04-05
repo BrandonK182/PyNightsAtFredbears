@@ -1,14 +1,17 @@
 '''
 class Chick extending Enemy class
 *********************************************
-this is a specific enemy with its own special
-pathway to take
+This is a specific enemy that has access to the
+right hallway and the kitchen.
+Chick has a longer cooldown than Bunnie.
 **********************************************
 variables
 - name - name of the enemy type
 - movement_table - table dictating where this enemy can move
 - position - current room entity is occupying
 - difficulty - how likely the entity is to switch position
+- last_move_time - last time the entity had a movement check
+- cooldown - how long the entity has to wait till they can move again
 *********************************************
 functions
 - populate_movement_table() - fills the movement_table with the

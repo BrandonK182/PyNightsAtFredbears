@@ -3,6 +3,7 @@ import random
 import numpy as np
 from Bunnie import Bunnie
 from Chick import Chick
+from Fred import Fred
 from map import Map
 from enum import Enum
 
@@ -15,7 +16,7 @@ class GAME_STATE(Enum):
     GAME_OVER_BUNNIE = 4
     GAME_OVER_CHICK = 5
     GAME_OVER_FRED = 6
-    GAME_OVER_VIXEN = 4
+    GAME_OVER_VIXEN = 7
 
 # Press Shift+F10 to execute it or replace it with your code.
 # Press Double Shift to search everywhere for classes, files, tool windows, actions, and settings.
@@ -41,7 +42,7 @@ vixenDifficulty = 15
 
 bunnie = Bunnie(bunnieDifficulty)
 chick = Chick(chickDifficulty)
-fred = 4
+fred = Fred(fredDifficulty)
 vixen = 3
 
 grey = (100, 100, 100)
@@ -153,6 +154,19 @@ while running:
         # check if chick can move to a different room
         else:
             chick.movement_opportunity()
+    if fred.can_move(seconds):
+        # if Fred next to the office, roll for kill
+        if fred.can_attack():
+            if fred.kill_opportunity():
+                if right_door_closed:
+                    # resets position if the player stopped Fred
+                    fred.reset()
+                else:
+                    # kill player if door is open
+                    state = GAME_STATE.GAME_OVER_FRED
+        # check if Fred can move to a different room
+        else:
+            fred.movement_opportunity()
 
     # CAMERA LOGIC
     # if button is clicked
@@ -192,6 +206,7 @@ while running:
     # DRAWING THE FRAME
     # DEBUG ENEMY DOTS
     if debug:
+        # bunnie blue dot position
         if bunnie.position == 11:
             bunnie_cam = match_camera(10)
             bunnie_x = bunnie_cam.x + (100 * game_map.scale)
@@ -200,16 +215,24 @@ while running:
             bunnie_cam = match_camera(bunnie.position)
             bunnie_x = bunnie_cam.x + (50 * game_map.scale)
             bunnie_y = bunnie_cam.y + (10 * game_map.scale)
-
+        # chick yellow dot position
         if chick.position == 11:
             chick_cam = match_camera(10)
-            chick_x = chick_cam.x + (129 * game_map.scale)
+            chick_x = chick_cam.x + (120 * game_map.scale)
             chick_y = chick_cam.y + (75 * game_map.scale)
         else:
             chick_cam = match_camera(chick.position)
             chick_x = chick_cam.x + (70 * game_map.scale)
             chick_y = chick_cam.y + (10 * game_map.scale)
-
+        # fred brown dot position
+        if fred.position == 11:
+            fred_cam = match_camera(10)
+            fred_x = fred_cam.x + (140 * game_map.scale)
+            fred_y = fred_cam.y + (75 * game_map.scale)
+        else:
+            fred_cam = match_camera(fred.position)
+            fred_x = fred_cam.x + (90 * game_map.scale)
+            fred_y = fred_cam.y + (10 * game_map.scale)
 
     # draw the boundaries for the camera flip marker
     pygame.draw.rect(screen, off_white, (cam_flip_x, cam_flip_y, cam_flip_w, cam_flip_h), 1)
@@ -223,7 +246,7 @@ while running:
         if debug:
             pygame.draw.circle(screen, (0, 50, 200), (bunnie_x, bunnie_y), radius, 0)
             pygame.draw.circle(screen, (225, 225, 0), (chick_x, chick_y), radius, 0)
-            # pygame.draw.circle(screen, (150, 75, 0), (Fred_x, Fred_y), radius, 0)
+            pygame.draw.circle(screen, (150, 75, 0), (fred_x, fred_y), radius, 0)
     # draw the office
     else:
         btn_x = 200
