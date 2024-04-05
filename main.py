@@ -1,7 +1,8 @@
 import pygame
 import random
 import numpy as np
-from Bunnie import Bunnie_Class
+from Bunnie import Bunnie
+from Chick import Chick
 from map import Map
 from enum import Enum
 
@@ -12,7 +13,9 @@ class GAME_STATE(Enum):
     GAME_OVER = 2
     WIN = 3
     GAME_OVER_BUNNIE = 4
-
+    GAME_OVER_CHICK = 5
+    GAME_OVER_FRED = 6
+    GAME_OVER_VIXEN = 4
 
 # Press Shift+F10 to execute it or replace it with your code.
 # Press Double Shift to search everywhere for classes, files, tool windows, actions, and settings.
@@ -24,16 +27,22 @@ clock = pygame.time.Clock()
 running = True
 state = GAME_STATE.GAME
 
+debug = True
+
 milliseconds = 0
 seconds = 0
-prev_second = 0
 first_tick = pygame.time.get_ticks()
 
 # ENEMIES
-Bunnie = Bunnie_Class(15)
-Chick = 5
-Fredbear = 4
-Vixen = 3
+bunnieDifficulty = 15
+chickDifficulty = 15
+fredDifficulty = 15
+vixenDifficulty = 15
+
+bunnie = Bunnie(bunnieDifficulty)
+chick = Chick(chickDifficulty)
+fred = 4
+vixen = 3
 
 grey = (100, 100, 100)
 white = (200, 200, 200)
@@ -108,53 +117,49 @@ while running:
 
     # RENDER YOUR GAME HERE
     # GAME LOGIC
-    # count number off frames so to tell how many seconds have passed
+    # count milliseconds between frames to tell how much time has passed
     time_passed = clock.get_time()
     milliseconds += time_passed
 
     # converts to seconds so timings make sense to players
-    if milliseconds > 1000:
-        seconds += milliseconds / 1000
-        milliseconds = milliseconds % 1000
+    seconds = milliseconds / 1000
 
     # BONNIE AI - PORT THIS TO ENEMY CLASS
     # if a second passed then check for movement opportunity
-
-    # every second do a movement check
-    if seconds - prev_second > 5:
-        prev_second = seconds
-        print(seconds)
-        # check movement opportunity
-        if Bunnie.can_attack():
-            if Bunnie.kill_opportunity():
+    # check movement opportunity
+    if bunnie.can_move(seconds):
+        # if Bunnie next to the office, roll for kill
+        if bunnie.can_attack():
+            if bunnie.kill_opportunity():
                 if left_door_closed:
                     # resets position if the player stopped Bunnie
-                    Bunnie.reset()
+                    bunnie.reset()
                 else:
-                    # kill player
+                    # kill player if door is open
                     state = GAME_STATE.GAME_OVER_BUNNIE
+        # check if Bunnie can move to a different room
         else:
-            Bunnie.movement_opportunity()
+            bunnie.movement_opportunity()
+    if chick.can_move(seconds):
+        # if Chick next to the office, roll for kill
+        if chick.can_attack():
+            if chick.kill_opportunity():
+                if right_door_closed:
+                    # resets position if the player stopped Chick
+                    chick.reset()
+                else:
+                    # kill player if door is open
+                    state = GAME_STATE.GAME_OVER_CHICK
+        # check if chick can move to a different room
+        else:
+            chick.movement_opportunity()
 
-
-    # DRAWING THE FRAME
-    if Bunnie.position == 11:
-        bunnie_cam = match_camera(10)
-        Bunnie_x = bunnie_cam.x + 100 * game_map.scale
-        Bunnie_y = bunnie_cam.y + 100 * game_map.scale
-    else:
-        bunnie_cam = match_camera(Bunnie.position)
-        Bunnie_x = bunnie_cam.x + (50 * game_map.scale)
-        Bunnie_y = bunnie_cam.y + (10 * game_map.scale)
-
-    # draw the boundaries for the camera flip marker
-    pygame.draw.rect(screen, off_white, (cam_flip_x, cam_flip_y, cam_flip_w, cam_flip_h), 1)
-
+    # CAMERA LOGIC
     # if button is clicked
     mouse_presses = pygame.mouse.get_pressed()
     mousex, mousey = pygame.mouse.get_pos()
 
-    #check which door button or camera was clicked
+    # check which door button or camera was clicked
     if mouse_presses[0] and not mouse_held:
         print("Left Mouse was pressed")
         mouse_held = True
@@ -172,7 +177,6 @@ while running:
                     print("press button 2")
                     right_door_closed = not right_door_closed
 
-
     # flips the camera if the user flicks their mouse down to the box
     if not cam_flip_hover:
         if cam_flip_x < mousex < cam_flip_x + cam_flip_w:
@@ -185,15 +189,41 @@ while running:
         if cam_flip_y > mousey:
             cam_flip_hover = False
 
-    #draw camera scene
+    # DRAWING THE FRAME
+    # DEBUG ENEMY DOTS
+    if debug:
+        if bunnie.position == 11:
+            bunnie_cam = match_camera(10)
+            bunnie_x = bunnie_cam.x + (100 * game_map.scale)
+            bunnie_y = bunnie_cam.y + (75 * game_map.scale)
+        else:
+            bunnie_cam = match_camera(bunnie.position)
+            bunnie_x = bunnie_cam.x + (50 * game_map.scale)
+            bunnie_y = bunnie_cam.y + (10 * game_map.scale)
+
+        if chick.position == 11:
+            chick_cam = match_camera(10)
+            chick_x = chick_cam.x + (129 * game_map.scale)
+            chick_y = chick_cam.y + (75 * game_map.scale)
+        else:
+            chick_cam = match_camera(chick.position)
+            chick_x = chick_cam.x + (70 * game_map.scale)
+            chick_y = chick_cam.y + (10 * game_map.scale)
+
+
+    # draw the boundaries for the camera flip marker
+    pygame.draw.rect(screen, off_white, (cam_flip_x, cam_flip_y, cam_flip_w, cam_flip_h), 1)
+
+    # draw camera scene
     if cam_flipped_up:
         draw_map()
         # highlight the camera selected
         pygame.draw.rect(screen, off_white, pygame.Rect(current_cam.x, current_cam.y, current_cam.w, current_cam.h))
         # drawing enemy units
-        pygame.draw.circle(screen, (0, 50, 200), (Bunnie_x, Bunnie_y), radius, 0)
-        # pygame.draw.circle(screen, (225, 225, 0), (Chick_x, Chick_y), radius, 0)
-        # pygame.draw.circle(screen, (150, 75, 0), (Fredbear_x, Fredbear_y), radius, 0)
+        if debug:
+            pygame.draw.circle(screen, (0, 50, 200), (bunnie_x, bunnie_y), radius, 0)
+            pygame.draw.circle(screen, (225, 225, 0), (chick_x, chick_y), radius, 0)
+            # pygame.draw.circle(screen, (150, 75, 0), (Fred_x, Fred_y), radius, 0)
     # draw the office
     else:
         btn_x = 200
@@ -214,6 +244,15 @@ while running:
 
     if state == GAME_STATE.GAME_OVER_BUNNIE:
         screen.fill("purple")
+
+    if state == GAME_STATE.GAME_OVER_CHICK:
+        screen.fill("yellow")
+
+    if state == GAME_STATE.GAME_OVER_FRED:
+        screen.fill("brown")
+
+    if state == GAME_STATE.GAME_OVER_VIXEN:
+        screen.fill("red")
 
     # Render new frame
     pygame.display.flip()

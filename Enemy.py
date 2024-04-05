@@ -1,7 +1,8 @@
 '''
 Template class for the general structure of an Enemy type storing
-- location
-- movement options
+- current location
+- movement options based off their current location
+- checking if they can kill the player
 '''
 from enum import Enum
 import random
@@ -14,6 +15,8 @@ class Enemy:
         self.movement_table = np.zeros((4, 13))
         self.position = 1
         self.difficulty = difficulty
+        self.last_move_time = 0
+        self.cooldown = 10
 
     class Directions(Enum):
         UP = 0
@@ -32,10 +35,8 @@ class Enemy:
     def move(self, enemy_location):
         valid = False
         while not valid:
-            print("TEST")
             movement = random.randint(0, 3)
             if self.is_valid_move(enemy_location, movement):
-                print("VALID")
                 return self.movement_table[movement][enemy_location]
         return enemy_location
 
@@ -46,7 +47,7 @@ class Enemy:
         rand_num = random.randint(1, 20)
         if rand_num <= self.difficulty:
             self.position = int(self.move(self.position))
-            print("Bunnie moved to " + str(self.position))
+            print(self.name + " moved to " + str(self.position))
 
     def kill_opportunity(self):
         rand_num = random.randint(1, 20)
@@ -59,5 +60,16 @@ class Enemy:
 
     def can_attack(self):
         if self.position == 11:
+            return True
+        return False
+
+    def can_move(self, current_time):
+        if current_time - self.last_move_time > self.cooldown:
+            self.last_move_time = current_time
+            return True
+        return False
+
+    def room_occupied(self, room, other):
+        if room == other.position:
             return True
         return False
