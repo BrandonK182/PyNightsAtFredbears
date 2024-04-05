@@ -7,7 +7,7 @@ from Enemy import Enemy
 Vixen is a special enemy in that her mechanics are
 completely different from that of the average enemy
 '''
-default_timer = 20.0
+default_timer = 10.0
 class Vixen(Enemy):
     def __init__(self, difficulty, ez_mode):
         self.name = "Vixen"
@@ -63,9 +63,6 @@ class Vixen(Enemy):
     def move(self, cam_watching, cam_up, time_passed):
         # decrease time regardless of cam watched if in
         # the attack phase
-        print("VIXEN DEBUG")
-        print("timer: " + str(self.timer))
-        print("stage: " + str(self.stage))
         if self.position == 7:
             self.dec_timer(time_passed)
             # special mechanic where if player checks the hallway cam

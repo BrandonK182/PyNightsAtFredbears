@@ -106,6 +106,9 @@ def match_camera(position):
             return cam
     return game_map.cameras[0]
 
+pygame.font.init() # you have to call this at the start,
+                   # if you want to use this module.
+my_font = pygame.font.SysFont('Comic Sans MS', 30)
 
 while running:
     # poll for events
@@ -267,6 +270,8 @@ while running:
             pygame.draw.circle(screen, (225, 225, 0), (chick_x, chick_y), radius, 0)
             pygame.draw.circle(screen, (150, 75, 0), (fred_x, fred_y), radius, 0)
             pygame.draw.circle(screen, (225, 25, 25), (vixen_x, vixen_y), vixen.stage*scale, 0)
+            text_surface = my_font.render(str(round(vixen.timer)), False, (225, 25, 25))
+            screen.blit(text_surface, (vixen_x+25, vixen_y-25))
     # draw the office
     else:
         btn_x = 200
