@@ -7,7 +7,7 @@ from Enemy import Enemy
 Vixen is a special enemy in that her mechanics are
 completely different from that of the average enemy
 '''
-default_timer = 10.0
+default_timer = 20.0
 class Vixen(Enemy):
     def __init__(self, difficulty, ez_mode):
         self.name = "Vixen"
