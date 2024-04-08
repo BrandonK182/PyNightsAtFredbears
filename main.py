@@ -21,6 +21,7 @@ class GAME_STATE(Enum):
     NO_POWER = 8
     INTRO = 9
 
+
 # Press Shift+F10 to execute it or replace it with your code.
 # Press Double Shift to search everywhere for classes, files, tool windows, actions, and settings.
 
@@ -82,12 +83,24 @@ cam_flip_h = 50
 cam_flipped_up = False
 cam_flip_hover = False
 
-btn_xL = 200
+btn_xL = 50
 btn_y = 400
-btn_xR = 1000
+btn_xR = 1150
 btn_size = 50
 
 light_y = 500
+
+window_xL = 400
+window_xR = 750
+window_y = 50
+window_w = 100
+window_h = 300
+
+door_xL = 150
+door_xR = 900
+door_y = 50
+door_w = 200
+door_h = 500
 
 energy = 100.0
 power_consumption = 1
@@ -98,6 +111,7 @@ power_out = False
 game_map = Map(map_x, map_y, scale, thick)
 current_cam = game_map.cameras[0]
 level = 1
+
 
 def draw_map():
     i = 0
@@ -125,6 +139,13 @@ def match_camera(position):
         if cam.position == position:
             return cam
     return game_map.cameras[0]
+
+
+def reset_all():
+    bunnie.full_reset()
+    chick.full_reset()
+    fred.full_reset()
+    vixen.reset()
 
 
 pygame.font.init()  # you have to call this at the start,
@@ -210,7 +231,6 @@ while running:
         game_start_time = seconds
         state = GAME_STATE.GAME
 
-
     if state == GAME_STATE.GAME:
 
         # fill the screen with a color to wipe away anything from last frame
@@ -271,6 +291,9 @@ while running:
                 vixen.reset()
                 energy -= 10
             else:
+                pygame.draw.circle(screen, (225, 25, 25), (175, 300), 100, 0)
+                pygame.display.flip()
+                pygame.time.delay(1000)
                 state = GAME_STATE.GAME_OVER_VIXEN
 
         # CAMERA LOGIC
@@ -399,18 +422,39 @@ while running:
             # drawing the buttons used in game
             if left_door_closed:
                 left_color = green
+                # draw the door if closed
+                pygame.draw.rect(screen, grey, pygame.Rect(door_xL, door_y, door_w, door_h))
             else:
                 left_color = red
             if right_door_closed:
                 right_color = green
+                # draw the door if closed
+                pygame.draw.rect(screen, grey, pygame.Rect(door_xR, door_y, door_w, door_h))
             else:
                 right_color = red
             if left_light_on:
                 left_light_clr = white
+                rand = random.randint(1, 10)
+                # create a flicker effect
+                if rand <= 9:
+                    pygame.draw.rect(screen, off_white, pygame.Rect(window_xL, window_y, window_w, window_h))
+                    # draw the enemy at the window if they are at the office
+                    if bunnie.position == 11:
+                        pygame.draw.circle(screen, (0, 50, 200), (window_xL + window_w / 2, window_y + window_h / 2),
+                                           50, 0)
+
             else:
                 left_light_clr = grey
             if right_light_on:
                 right_light_clr = white
+                rand = random.randint(1, 10)
+                # create a flicker effect
+                if rand <= 9:
+                    pygame.draw.rect(screen, off_white, pygame.Rect(window_xR, window_y, window_w, window_h))
+                    # draw the enemy at the window if they are at the office
+                    if chick.position == 11:
+                        pygame.draw.circle(screen, (225, 225, 0), (window_xR + window_w / 2, window_y + window_h / 2),
+                                           50, 0)
             else:
                 right_light_clr = grey
             pygame.draw.rect(screen, left_color, pygame.Rect(btn_xL, btn_y, btn_size, btn_size))
@@ -486,7 +530,6 @@ while running:
                 pygame.draw.circle(screen, white, (100, 200), 25, 15)
                 pygame.draw.circle(screen, white, (175, 200), 25, 15)
 
-
     if state == GAME_STATE.WIN:
         screen.fill("black")
         win_text = my_font.render("5 AM", False, (0, 0, 0))
@@ -497,7 +540,11 @@ while running:
         screen.blit(win_text, (600, 400))
         pygame.display.flip()
         pygame.time.delay(5000)
-        state = GAME_STATE.MENU
+        if level < 5:
+            level += 1
+            state = GAME_STATE.INTRO
+        else:
+            state = GAME_STATE.MENU
 
     # Render new frame
     pygame.display.flip()

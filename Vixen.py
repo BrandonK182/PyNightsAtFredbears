@@ -18,7 +18,6 @@ class Vixen(Enemy):
         self.viewing_vixen = False
         self.checked_hall_already = False
         self.is_ez = ez_mode
-        self.progress_bar = 0.0
 
     def inc_stage(self):
         self.stage += 1
@@ -98,6 +97,7 @@ class Vixen(Enemy):
                         self.inc_stage()
 
     def reset(self):
+        self.viewing_vixen = False
         self.checked_hall_already = False
         self.stage = 1
         self.reset_timer()

@@ -43,6 +43,9 @@ class Enemy:
     def reset(self):
         self.position = 3
 
+    def full_reset(self):
+        self.position = 1
+
     def movement_opportunity(self):
         rand_num = random.randint(1, 20)
         if rand_num <= self.difficulty:
