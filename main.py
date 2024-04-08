@@ -18,6 +18,7 @@ class GAME_STATE(Enum):
     GAME_OVER_CHICK = 5
     GAME_OVER_FRED = 6
     GAME_OVER_VIXEN = 7
+    NO_POWER = 8
 
 # Press Shift+F10 to execute it or replace it with your code.
 # Press Double Shift to search everywhere for classes, files, tool windows, actions, and settings.
@@ -53,6 +54,7 @@ white = (200, 200, 200)
 off_white = (175, 175, 175)
 red = (200, 0, 0)
 green = (0, 200, 0)
+yellow = (225, 225, 0)
 thick = 3
 scale = 1.5
 map_x = 250
@@ -66,14 +68,32 @@ cam_w = 40 * scale
 cam_h = 25 * scale
 left_door_closed = False
 right_door_closed = False
+left_light_on = False
+right_light_on = False
 left_color = red
-right_color = green
-cam_flip_x = 100
+right_color = red
+left_light_clr = grey
+right_light_clr = grey
+cam_flip_x = 200
 cam_flip_y = 600
 cam_flip_w = 800
 cam_flip_h = 100
 cam_flipped_up = False
 cam_flip_hover = False
+
+btn_xL = 200
+btn_y = 400
+btn_xR = 1000
+btn_size = 50
+
+light_y = 500
+
+energy = 100.0
+power_consumption = 1
+drain_tick = 0.002
+win_timer = 600
+
+
 
 game_map = Map(map_x, map_y, scale, thick)
 current_cam = game_map.cameras[0]
@@ -106,8 +126,9 @@ def match_camera(position):
             return cam
     return game_map.cameras[0]
 
-pygame.font.init() # you have to call this at the start,
-                   # if you want to use this module.
+
+pygame.font.init()  # you have to call this at the start,
+# if you want to use this module.
 my_font = pygame.font.SysFont('Comic Sans MS', 30)
 
 while running:
@@ -118,6 +139,10 @@ while running:
             running = False
         if event.type == pygame.MOUSEBUTTONUP:
             mouse_held = False
+            if left_light_on or right_light_on:
+                left_light_on = False
+                right_light_on = False
+                power_consumption -= 1
 
     # fill the screen with a color to wipe away anything from last frame
     screen.fill("black")
@@ -175,7 +200,7 @@ while running:
             fred.movement_opportunity()
 
     # Vixen's timer
-    vixen.move(current_cam, cam_flipped_up, time_passed/1000)
+    vixen.move(current_cam, cam_flipped_up, time_passed / 1000)
     if vixen.can_kill():
         if left_door_closed:
             vixen.reset()
@@ -198,12 +223,32 @@ while running:
         # if users are in the office, let them click the door buttons
         else:
             if btn_y < mousey < btn_y + btn_size:
-                if btn_x < mousex < btn_x + btn_size:
-                    print("press button 1")
+                if btn_xL < mousex < btn_xL + btn_size:
+                    print("press door left")
                     left_door_closed = not left_door_closed
-                elif btn2_x < mousex < btn2_x + btn_size:
-                    print("press button 2")
+                    if left_door_closed:
+                        power_consumption += 1
+                    else:
+                        power_consumption -= 1
+                elif btn_xR < mousex < btn_xR + btn_size:
+                    print("press door right")
                     right_door_closed = not right_door_closed
+                    if right_door_closed:
+                        power_consumption += 1
+                    else:
+                        power_consumption -= 1
+            # check if the door lights are turned on
+            elif light_y < mousey < light_y + btn_size:
+                if btn_xL < mousex < btn_xL + btn_size:
+                    print("press light left")
+                    left_light_on = True
+                    if left_light_on:
+                        power_consumption += 1
+                elif btn_xR < mousex < btn_xR + btn_size:
+                    print("press light right")
+                    right_light_on = True
+                    if right_light_on:
+                        power_consumption += 1
 
     # flips the camera if the user flicks their mouse down to the box
     if not cam_flip_hover:
@@ -212,10 +257,19 @@ while running:
                 # toggles cameras
                 cam_flip_hover = True
                 cam_flipped_up = not cam_flipped_up
+                if cam_flipped_up:
+                    power_consumption += 1
+                else:
+                    power_consumption -= 1
     # measure to prevent multiple toggles when user mouse hovers
     else:
         if cam_flip_y > mousey:
             cam_flip_hover = False
+
+    # Calculate the power consumption
+    energy -= power_consumption * drain_tick
+
+
 
     # DRAWING THE FRAME
     # DEBUG ENEMY DOTS
@@ -269,15 +323,11 @@ while running:
             pygame.draw.circle(screen, (0, 50, 200), (bunnie_x, bunnie_y), radius, 0)
             pygame.draw.circle(screen, (225, 225, 0), (chick_x, chick_y), radius, 0)
             pygame.draw.circle(screen, (150, 75, 0), (fred_x, fred_y), radius, 0)
-            pygame.draw.circle(screen, (225, 25, 25), (vixen_x, vixen_y), vixen.stage*scale, 0)
-            text_surface = my_font.render(str(round(vixen.timer)), False, (225, 25, 25))
-            screen.blit(text_surface, (vixen_x+25, vixen_y-25))
+            pygame.draw.circle(screen, (225, 25, 25), (vixen_x, vixen_y), vixen.stage * scale, 0)
+            vixen_timer = my_font.render(str(round(vixen.timer)), False, (225, 25, 25))
+            screen.blit(vixen_timer, (vixen_x + 25, vixen_y - 25))
     # draw the office
     else:
-        btn_x = 200
-        btn_y = 400
-        btn2_x = 1000
-        btn_size = 50
         # drawing the buttons used in game
         if left_door_closed:
             left_color = green
@@ -287,20 +337,50 @@ while running:
             right_color = green
         else:
             right_color = red
-        pygame.draw.rect(screen, left_color, pygame.Rect(btn_x, btn_y, btn_size, btn_size))
-        pygame.draw.rect(screen, right_color, pygame.Rect(btn2_x, btn_y, btn_size, btn_size))
+        if left_light_on:
+            left_light_clr = white
+        else:
+            left_light_clr = grey
+        if right_light_on:
+            right_light_clr = white
+        else:
+            right_light_clr = grey
+        pygame.draw.rect(screen, left_color, pygame.Rect(btn_xL, btn_y, btn_size, btn_size))
+        pygame.draw.rect(screen, right_color, pygame.Rect(btn_xR, btn_y, btn_size, btn_size))
+        pygame.draw.rect(screen, left_light_clr, pygame.Rect(btn_xL, light_y, btn_size, btn_size))
+        pygame.draw.rect(screen, right_light_clr, pygame.Rect(btn_xR, light_y, btn_size, btn_size))
+
+    pygame.draw.rect(screen, green, pygame.Rect(25, 600, 20, 50))
+    if power_consumption >= 2:
+        pygame.draw.rect(screen, green, pygame.Rect(50, 600, 20, 50))
+    if power_consumption >= 3:
+        pygame.draw.rect(screen, yellow, pygame.Rect(75, 600, 20, 50))
+    if power_consumption >= 4:
+        pygame.draw.rect(screen, red, pygame.Rect(100, 600, 20, 50))
+    if power_consumption >= 5:
+        pygame.draw.rect(screen, red, pygame.Rect(125, 600, 20, 50))
+    power_left = my_font.render(str(round(energy)), False, (225, 25, 25))
+    screen.blit(power_left, (100, 550))
 
     if state == GAME_STATE.GAME_OVER_BUNNIE:
         screen.fill("purple")
+        game_over = my_font.render("you died to Bunnie", False, (0, 0, 0))
+        screen.blit(game_over, (600, 400))
 
     if state == GAME_STATE.GAME_OVER_CHICK:
         screen.fill("yellow")
+        game_over = my_font.render("you died to Chick", False, (0, 0, 0))
+        screen.blit(game_over, (600, 400))
 
     if state == GAME_STATE.GAME_OVER_FRED:
         screen.fill("brown")
+        game_over = my_font.render("you died to Fred", False, (0, 0, 0))
+        screen.blit(game_over, (600, 400))
 
     if state == GAME_STATE.GAME_OVER_VIXEN:
         screen.fill("red")
+        game_over = my_font.render("you died to Vixen", False, (0, 0, 0))
+        screen.blit(game_over, (600, 400))
 
     # Render new frame
     pygame.display.flip()
