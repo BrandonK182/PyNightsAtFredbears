@@ -184,46 +184,49 @@ while running:
 
         if mouse_presses[0]:
             level = 1
-
-            # level determines enemy difficulty
-            if level == 1:
-                bunnieDifficulty = 1
-                chickDifficulty = 1
-                fredDifficulty = 0
-                vixenDifficulty = 0
-
-            if level == 2:
-                bunnieDifficulty = 4
-                chickDifficulty = 3
-                fredDifficulty = 0
-                vixenDifficulty = 1
-
-            if level == 3:
-                bunnieDifficulty = 7
-                chickDifficulty = 5
-                fredDifficulty = 1
-                vixenDifficulty = 3
-
-            if level == 4:
-                bunnieDifficulty = 10
-                chickDifficulty = 7
-                fredDifficulty = 3
-                vixenDifficulty = 5
-
-            if level == 5:
-                bunnieDifficulty = 12
-                chickDifficulty = 10
-                fredDifficulty = 5
-                vixenDifficulty = 7
-
-            bunnie.difficulty = bunnieDifficulty
-            chick.difficulty = chickDifficulty
-            fred.difficulty = fredDifficulty
-            vixen.difficulty = vixenDifficulty
             state = GAME_STATE.INTRO
 
     if state == GAME_STATE.INTRO:
         screen.fill("black")
+
+        # level determines enemy difficulty
+        if level == 1:
+            bunnieDifficulty = 1
+            chickDifficulty = 1
+            fredDifficulty = 0
+            vixenDifficulty = 0
+
+        if level == 2:
+            bunnieDifficulty = 4
+            chickDifficulty = 3
+            fredDifficulty = 0
+            vixenDifficulty = 1
+
+        if level == 3:
+            bunnieDifficulty = 7
+            chickDifficulty = 5
+            fredDifficulty = 1
+            vixenDifficulty = 3
+
+        if level == 4:
+            bunnieDifficulty = 10
+            chickDifficulty = 7
+            fredDifficulty = 3
+            vixenDifficulty = 5
+
+        if level == 5:
+            bunnieDifficulty = 12
+            chickDifficulty = 10
+            fredDifficulty = 5
+            vixenDifficulty = 7
+
+        bunnie.difficulty = bunnieDifficulty
+        chick.difficulty = chickDifficulty
+        fred.difficulty = fredDifficulty
+        vixen.difficulty = vixenDifficulty
+
+        reset_all()
+
         start_text = my_font.render("Night " + str(level), False, white)
         screen.blit(start_text, (600, 350))
         pygame.display.flip()
@@ -238,8 +241,14 @@ while running:
 
         # RENDER YOUR GAME HERE
         # check win condition
-        if seconds - game_start_time >= win_timer:
+        seconds_remaining = seconds - game_start_time
+        if seconds_remaining >= win_timer:
             state = GAME_STATE.WIN
+
+        if seconds_remaining >= 100:
+            game_clock = round((seconds_remaining - (seconds_remaining % 100)) / 100)
+        else:
+            game_clock = 12
 
         # BONNIE AI - PORT THIS TO ENEMY CLASS
         # if a second passed then check for movement opportunity
@@ -475,6 +484,9 @@ while running:
             pygame.draw.rect(screen, yellow, pygame.Rect(175, 650, 20, 50))
         if power_consumption >= 4:
             pygame.draw.rect(screen, red, pygame.Rect(200, 650, 20, 50))
+
+        clock_text = my_font.render(str(game_clock) + " AM", False, white)
+        screen.blit(clock_text, (0, 0))
 
     if state == GAME_STATE.GAME_OVER_BUNNIE:
         screen.fill("purple")
