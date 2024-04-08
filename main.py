@@ -466,8 +466,15 @@ while running:
                                            50, 0)
             else:
                 right_light_clr = grey
+            door_text = my_font.render("door", False, white)
+            screen.blit(door_text, (btn_xL, btn_y + btn_size))
+            screen.blit(door_text, (btn_xR, btn_y + btn_size))
             pygame.draw.rect(screen, left_color, pygame.Rect(btn_xL, btn_y, btn_size, btn_size))
             pygame.draw.rect(screen, right_color, pygame.Rect(btn_xR, btn_y, btn_size, btn_size))
+
+            light_text = my_font.render("lights", False, white)
+            screen.blit(light_text, (btn_xL, light_y + btn_size))
+            screen.blit(light_text, (btn_xR, light_y + btn_size))
             pygame.draw.rect(screen, left_light_clr, pygame.Rect(btn_xL, light_y, btn_size, btn_size))
             pygame.draw.rect(screen, right_light_clr, pygame.Rect(btn_xR, light_y, btn_size, btn_size))
 
