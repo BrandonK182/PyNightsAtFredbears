@@ -524,6 +524,7 @@ while running:
         game_over = my_font.render("you died to Bunnie", True, (0, 0, 0))
         screen.blit(game_over, (600, 400))
         pygame.display.flip()
+        pygame.mixer.Channel(0).stop()
         # pause game and send user back to menu
         pygame.time.delay(5000)
         state = GAME_STATE.MENU
@@ -533,6 +534,7 @@ while running:
         game_over = my_font.render("you died to Chick", True, (0, 0, 0))
         screen.blit(game_over, (600, 400))
         pygame.display.flip()
+        pygame.mixer.Channel(0).stop()
         # pause game and send user back to menu
         pygame.time.delay(5000)
         state = GAME_STATE.MENU
@@ -542,6 +544,7 @@ while running:
         game_over = my_font.render("you died to Fred", True, (0, 0, 0))
         screen.blit(game_over, (600, 400))
         pygame.display.flip()
+        pygame.mixer.Channel(0).stop()
         # pause game and send user back to menu
         pygame.time.delay(5000)
         state = GAME_STATE.MENU
@@ -551,12 +554,14 @@ while running:
         game_over = my_font.render("you died to Vixen", True, (0, 0, 0))
         screen.blit(game_over, (600, 400))
         pygame.display.flip()
+        pygame.mixer.Channel(0).stop()
         # pause game and send user back to menu
         pygame.time.delay(5000)
         state = GAME_STATE.MENU
 
     if state == GAME_STATE.NO_POWER:
         screen.fill("black")
+        pygame.mixer.Channel(0).stop()
         # allow win condition in power out mode
         if seconds - game_start_time >= win_timer:
             state = GAME_STATE.WIN
@@ -582,6 +587,7 @@ while running:
         win_text = my_font.render("6 AM", True, (0, 0, 0))
         screen.blit(win_text, (600, 400))
         pygame.display.flip()
+        pygame.mixer.Channel(0).stop()
         pygame.time.delay(5000)
         if level < 5:
             level += 1
