@@ -112,6 +112,11 @@ game_map = Map(map_x, map_y, scale, thick)
 current_cam = game_map.cameras[0]
 level = 1
 
+pygame.font.init()  # you have to call this at the start,
+# if you want to use this module.
+my_font = pygame.font.SysFont('Comic Sans MS', 30)
+smaller_font = pygame.font.SysFont('Comic Sans MS', 15)
+
 
 def draw_map():
     i = 0
@@ -123,6 +128,17 @@ def draw_map():
     # CAM SQUARES
     for cam in game_map.cameras:
         pygame.draw.rect(screen, white, (cam.x, cam.y, cam.w, cam.h), cam.thick)
+        cam_text = smaller_font.render("CAM ", True, white)
+        cam_name = smaller_font.render(cam.name, True, white)
+        screen.blit(cam_text, (cam.x + 2, cam.y - 2))
+        screen.blit(cam_name, (cam.x + 2, cam.y + 10))
+
+    pygame.draw.rect(screen, white,
+                     (game_map.player_location_x, game_map.player_location_y + 25 * game_map.scale, 10 * game_map.scale,
+                      10 * game_map.scale),
+                     0)
+    player_text = smaller_font.render("YOU", True, white)
+    screen.blit(player_text, (game_map.player_location_x - 10, game_map.player_location_y))
 
 
 def get_camera_clicked(x, y, current):
@@ -148,9 +164,9 @@ def reset_all():
     vixen.reset()
 
 
-pygame.font.init()  # you have to call this at the start,
-# if you want to use this module.
-my_font = pygame.font.SysFont('Comic Sans MS', 30)
+# sound effects
+ambience = pygame.mixer.Sound('ambience.mp3')
+cam_sound = pygame.mixer.Sound('cam_sound.mp3')
 
 while running:
     # poll for events
@@ -179,7 +195,7 @@ while running:
 
     if state == GAME_STATE.MENU:
         screen.fill("black")
-        start_text = my_font.render("click anywhere to start", False, white)
+        start_text = my_font.render("click anywhere to start", True, white)
         screen.blit(start_text, (450, 350))
 
         if mouse_presses[0]:
@@ -227,11 +243,15 @@ while running:
 
         reset_all()
 
-        start_text = my_font.render("Night " + str(level), False, white)
+        start_text = my_font.render("Night " + str(level), True, white)
         screen.blit(start_text, (600, 350))
         pygame.display.flip()
         pygame.time.delay(5000)
         game_start_time = seconds
+
+        # play background ambience noises
+        pygame.mixer.Channel(0).play(ambience)
+
         state = GAME_STATE.GAME
 
     if state == GAME_STATE.GAME:
@@ -314,7 +334,10 @@ while running:
             # let the user click cameras if cameras are up
             if cam_flipped_up:
                 # check if camera is clicked
-                current_cam = get_camera_clicked(mousex, mousey, current_cam)
+                new_cam = get_camera_clicked(mousex, mousey, current_cam)
+                if new_cam != current_cam:
+                    pygame.mixer.Channel(1).play(cam_sound)
+                    current_cam = new_cam
             # if users are in the office, let them click the door buttons
             else:
                 if btn_y < mousey < btn_y + btn_size:
@@ -352,6 +375,7 @@ while running:
                     # toggles cameras
                     cam_flip_hover = True
                     cam_flipped_up = not cam_flipped_up
+                    pygame.mixer.Channel(1).play(cam_sound)
                     if cam_flipped_up:
                         power_consumption += 1
                     else:
@@ -424,7 +448,7 @@ while running:
                 pygame.draw.circle(screen, (150, 75, 0), (fred_x, fred_y), radius, 0)
                 pygame.draw.circle(screen, (225, 25, 25), (vixen_x, vixen_y), vixen.stage * scale, 0)
                 if vixen.difficulty > 0:
-                    vixen_timer = my_font.render(str(round(vixen.timer)), False, (225, 25, 25))
+                    vixen_timer = my_font.render(str(round(vixen.timer)), True, (225, 25, 25))
                     screen.blit(vixen_timer, (vixen_x + 25, vixen_y - 25))
         # draw the office
         else:
@@ -466,23 +490,23 @@ while running:
                                            50, 0)
             else:
                 right_light_clr = grey
-            door_text = my_font.render("door", False, white)
+            door_text = my_font.render("door", True, white)
             screen.blit(door_text, (btn_xL, btn_y + btn_size))
             screen.blit(door_text, (btn_xR, btn_y + btn_size))
             pygame.draw.rect(screen, left_color, pygame.Rect(btn_xL, btn_y, btn_size, btn_size))
             pygame.draw.rect(screen, right_color, pygame.Rect(btn_xR, btn_y, btn_size, btn_size))
 
-            light_text = my_font.render("lights", False, white)
+            light_text = my_font.render("lights", True, white)
             screen.blit(light_text, (btn_xL, light_y + btn_size))
             screen.blit(light_text, (btn_xR, light_y + btn_size))
             pygame.draw.rect(screen, left_light_clr, pygame.Rect(btn_xL, light_y, btn_size, btn_size))
             pygame.draw.rect(screen, right_light_clr, pygame.Rect(btn_xR, light_y, btn_size, btn_size))
 
-        power_left = my_font.render("power left: " + str(round(energy)), False, white)
+        power_left = my_font.render("power left: " + str(round(energy)), True, white)
         screen.blit(power_left, (25, 600))
 
         # draw additional rectangles for each tick of power usage
-        usage = my_font.render("Usage:", False, white)
+        usage = my_font.render("Usage:", True, white)
         screen.blit(usage, (25, 650))
         pygame.draw.rect(screen, green, pygame.Rect(125, 650, 20, 50))
         if power_consumption >= 2:
@@ -492,12 +516,12 @@ while running:
         if power_consumption >= 4:
             pygame.draw.rect(screen, red, pygame.Rect(200, 650, 20, 50))
 
-        clock_text = my_font.render(str(game_clock) + " AM", False, white)
+        clock_text = my_font.render(str(game_clock) + " AM", True, white)
         screen.blit(clock_text, (0, 0))
 
     if state == GAME_STATE.GAME_OVER_BUNNIE:
         screen.fill("purple")
-        game_over = my_font.render("you died to Bunnie", False, (0, 0, 0))
+        game_over = my_font.render("you died to Bunnie", True, (0, 0, 0))
         screen.blit(game_over, (600, 400))
         pygame.display.flip()
         # pause game and send user back to menu
@@ -506,7 +530,7 @@ while running:
 
     if state == GAME_STATE.GAME_OVER_CHICK:
         screen.fill("yellow")
-        game_over = my_font.render("you died to Chick", False, (0, 0, 0))
+        game_over = my_font.render("you died to Chick", True, (0, 0, 0))
         screen.blit(game_over, (600, 400))
         pygame.display.flip()
         # pause game and send user back to menu
@@ -515,7 +539,7 @@ while running:
 
     if state == GAME_STATE.GAME_OVER_FRED:
         screen.fill("brown")
-        game_over = my_font.render("you died to Fred", False, (0, 0, 0))
+        game_over = my_font.render("you died to Fred", True, (0, 0, 0))
         screen.blit(game_over, (600, 400))
         pygame.display.flip()
         # pause game and send user back to menu
@@ -524,7 +548,7 @@ while running:
 
     if state == GAME_STATE.GAME_OVER_VIXEN:
         screen.fill("red")
-        game_over = my_font.render("you died to Vixen", False, (0, 0, 0))
+        game_over = my_font.render("you died to Vixen", True, (0, 0, 0))
         screen.blit(game_over, (600, 400))
         pygame.display.flip()
         # pause game and send user back to menu
@@ -551,11 +575,11 @@ while running:
 
     if state == GAME_STATE.WIN:
         screen.fill("black")
-        win_text = my_font.render("5 AM", False, (0, 0, 0))
+        win_text = my_font.render("5 AM", True, (0, 0, 0))
         screen.blit(win_text, (600, 400))
         pygame.display.flip()
         pygame.time.delay(1000)
-        win_text = my_font.render("6 AM", False, (0, 0, 0))
+        win_text = my_font.render("6 AM", True, (0, 0, 0))
         screen.blit(win_text, (600, 400))
         pygame.display.flip()
         pygame.time.delay(5000)

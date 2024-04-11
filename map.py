@@ -16,6 +16,8 @@ class Map():
         self.thick = thickness
         self.populate_map()
         self.populate_cameras()
+        self.player_location_x = self.map_x + 170 * self.scale
+        self.player_location_y = self.map_y + 270 * self.scale
 
     def insert_rect(self, x, y, w, h):
         self.array_x.append(x)
@@ -56,8 +58,6 @@ class Map():
         self.insert_rect(self.map_x + 255 * self.scale, self.map_y + 200 * self.scale, 15 * self.scale, 15 * self.scale)
         # security room
         self.insert_rect(self.map_x + 155 * self.scale, self.map_y + 265 * self.scale, 35 * self.scale, 50 * self.scale)
-        # security room
-        self.insert_rect(self.map_x + 145 * self.scale, self.map_y + 285 * self.scale, 10 * self.scale, 10 * self.scale)
         # security - left connector
         self.insert_rect(self.map_x + 145 * self.scale, self.map_y + 285 * self.scale, 10 * self.scale, 10 * self.scale)
         # security - right connector
