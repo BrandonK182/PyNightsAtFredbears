@@ -51,6 +51,8 @@ chick = Chick(chickDifficulty)
 fred = Fred(fredDifficulty)
 vixen = Vixen(vixenDifficulty, vixenEZ)
 
+bunnie_cam_sprite = pygame.image.load("imgs/bunnie.png")
+
 grey = (100, 100, 100)
 white = (200, 200, 200)
 off_white = (175, 175, 175)
@@ -105,7 +107,7 @@ door_h = 500
 energy = 100.0
 power_consumption = 1
 drain_tick = 0.002
-win_timer = 600
+win_timer = 60
 power_out = False
 
 game_map = Map(map_x, map_y, scale, thick)
@@ -251,13 +253,14 @@ while running:
 
         # play background ambience noises
         pygame.mixer.Channel(0).play(ambience)
+        energy = 100
 
         state = GAME_STATE.GAME
 
     if state == GAME_STATE.GAME:
 
         # fill the screen with a color to wipe away anything from last frame
-        screen.fill("black")
+        screen.fill((25,25,25))
 
         # RENDER YOUR GAME HERE
         # check win condition
@@ -265,8 +268,8 @@ while running:
         if seconds_remaining >= win_timer:
             state = GAME_STATE.WIN
 
-        if seconds_remaining >= 100:
-            game_clock = round((seconds_remaining - (seconds_remaining % 100)) / 100)
+        if seconds_remaining >= (win_timer/6):
+            game_clock = round((seconds_remaining - (seconds_remaining % (win_timer/6))) / (win_timer/6))
         else:
             game_clock = 12
 
@@ -442,6 +445,8 @@ while running:
             # highlight the camera selected
             pygame.draw.rect(screen, off_white, pygame.Rect(current_cam.x, current_cam.y, current_cam.w, current_cam.h))
             # drawing enemy units
+            if (current_cam == bunnie_cam):
+                screen.blit(bunnie_cam_sprite, (400,400))
             if debug:
                 pygame.draw.circle(screen, (0, 50, 200), (bunnie_x, bunnie_y), radius, 0)
                 pygame.draw.circle(screen, (225, 225, 0), (chick_x, chick_y), radius, 0)
@@ -580,11 +585,11 @@ while running:
 
     if state == GAME_STATE.WIN:
         screen.fill("black")
-        win_text = my_font.render("5 AM", True, (0, 0, 0))
+        win_text = my_font.render("5 AM", True, white)
         screen.blit(win_text, (600, 400))
         pygame.display.flip()
         pygame.time.delay(1000)
-        win_text = my_font.render("6 AM", True, (0, 0, 0))
+        win_text = my_font.render("6 AM", True, white)
         screen.blit(win_text, (600, 400))
         pygame.display.flip()
         pygame.mixer.Channel(0).stop()
